@@ -9,14 +9,11 @@ section .bss
 section .data
     sys_exit  equ 60
     sys_write equ 1
-
     stdout equ 1
 
     ts:
         dq 1 ; seconds
         dq 0 ; nanoseconds
-
-    next_line db 10
 
     print_str db '0'
     print_str_len equ $ - print_str
@@ -26,8 +23,6 @@ section .data
 
     clear_line db 27, '[2K', 0   
     clear_line_len equ $ - clear_line
-
-    i dq 0
     
 section .text
 _start:
@@ -61,7 +56,7 @@ _start:
 
     ; wait a second
     mov eax, 35              ; syscall number for nanosleep (sys_nanosleep)
-    lea rdi, [ts]        ; pointer to timespec structure
+    lea rdi, [ts]            ; pointer to timespec structure
     xor rsi, rsi             ; NULL for remaining time (no need to track it)
     syscall
 
