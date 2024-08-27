@@ -17,6 +17,17 @@ int_to_ascii:
     mov rsi, [rbp + 16] ; buffer
     mov rax, [rbp + 24] ; num param
 
+    ;; if neg
+    test rax, rax
+    js .is_negative
+    jmp .push_loop
+
+.is_negative:
+    neg rax
+    mov [rsi], byte "-"
+    inc rsi
+    inc qword [rbp - 8]
+
 .push_loop:
     xor rdx, rdx
     div qword [rbp - 16]
@@ -25,8 +36,8 @@ int_to_ascii:
 
     inc qword [rbp - 8]
     cmp rax, 0
-jnz .push_loop
 
+    jnz .push_loop
     mov rdx, [rbp - 8]
 
 .pop_loop:
