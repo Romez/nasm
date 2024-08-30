@@ -1,10 +1,10 @@
 global _start
 
-extern int_to_ascii
+extern print_number
+extern print_char
 
 SECTION .bss
     curtime resq 1
-    buffer resb 64
 
 SECTION .data
     sys_exit equ 60
@@ -15,25 +15,16 @@ SECTION .data
 
 SECTION .text
 _start:
-    ;; get current epoch time
+    ; get current epoch time
     mov rax, sys_time
     mov rdi, curtime
     syscall
 
-    push qword [curtime]
-    push qword buffer
-    call int_to_ascii
-    ;; rax = len
+    mov rdi, qword [curtime]
+    call print_number
 
-    mov byte [buffer + rax], 10
-    inc rax
-
-    ; print time
-    mov rdi, stdout
-    mov rsi, buffer
-    mov rdx, rax
-    mov rax, sys_write
-    syscall
+    mov dil, 10
+    call print_char
 
     ; exit
     mov rax, sys_exit

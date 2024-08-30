@@ -1,86 +1,70 @@
 global _start
 
-extern int_to_ascii
+extern print_number
 extern str_to_int
 
 section .bss
     buffer resb 64
 
 section .data
-    sys_exit  equ 60
-    sys_write equ 1
-    stdout equ 1
-
     ts:
         dq 1 ; seconds
         dq 0 ; nanoseconds
 
-    print_str db '0'
-    print_str_len equ $ - print_str
-
-    move_up db 27, '[1A', 0
-    move_up_len equ $ - move_up
+    move_left db 27, '[1D', 0
+    move_left_len equ $ - move_left
 
     clear_line db 27, '[2K', 0   
     clear_line_len equ $ - clear_line
     
 section .text
+    sys_exit  equ 60
+    sys_write equ 1
+    stdout equ 1
 _start:
     push rbp
     mov rbp, rsp
+    ; prolog
 
-    sub rsp, 8
-    mov qword [rbp - 8], 0 ; number
-
-    push qword [rbp + 24] ; cmd params
+    mov rdi, qword [rbp + 24] ; cmd params
     call str_to_int
-    ; rax
 
-    mov qword [rbp - 8], rax
-.mainloop:
-    push qword [rbp - 8]
-    push buffer
-    call int_to_ascii
+    mov rcx, rax
 
-    ; rax - len
+.loop:
+    cmp rcx, 0
+    je .exit
 
-    mov byte [buffer + rax], 10
-    inc rax
+    push rcx
 
-    ; print time
-    mov rdi, stdout
-    mov rsi, buffer
-    mov rdx, rax
-    mov rax, sys_write
-    syscall
+    mov rdi, rcx
+    call print_number
 
     ; wait a second
-    mov eax, 35              ; syscall number for nanosleep (sys_nanosleep)
+    mov rax, 35              ; syscall number for nanosleep (sys_nanosleep)
     lea rdi, [ts]            ; pointer to timespec structure
     xor rsi, rsi             ; NULL for remaining time (no need to track it)
     syscall
 
-    ; Move cursor up one line
-    mov rax, 1                  ; syscall number for write (sys_write)
-    mov rdi, 1                  ; file descriptor 1 is stdout
-    mov rsi, move_up
-    mov rdx, move_up_len
+    ; Move cursor left one line
+    mov rax, sys_write
+    mov rdi, stdout
+    mov rsi, move_left
+    mov rdx, move_left_len
     syscall
 
     ; Clear the line
-    mov rax, 1                  ; syscall number for write (sys_write)
-    mov rdi, 1                  ; file descriptor 1 is stdout
+    mov rax, sys_write
+    mov rdi, stdout
     mov rsi, clear_line
     mov rdx, clear_line_len
     syscall
 
-        ; ----
-    dec qword [rbp - 8]
-    cmp qword [rbp - 8], -1
-    jnz .mainloop
-    jmp .exit
+    pop rcx
+    dec rcx
+
+    jmp .loop
     
-    ; -------
 .exit:
     mov rax, sys_exit
     mov rdi, 0

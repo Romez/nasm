@@ -1,5 +1,8 @@
-int_to_ascii
-int_to_ascii.o
-
+int_to_str
 str_to_int
-str_to_int.o
+
+*_test
+
+*.o
+
+.gdb_history
