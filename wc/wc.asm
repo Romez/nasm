@@ -28,6 +28,9 @@ _start:
     cmp rax, 0x20 ; space
     je .space
 
+    cmp rax, 10
+    je .space
+
     inc r10
     jmp .char
 
@@ -37,6 +40,9 @@ _start:
     je .exit
 
     cmp rax, 0x20 ; space
+    je .space
+
+    cmp rax, 10
     je .space
 
     jmp .char
