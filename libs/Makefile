@@ -23,3 +23,6 @@ strlen_test: stdlib
 
 print_number_test: stdlib
 	nasm -f elf64 ./tests/print_number_test.asm && ld stdlib.o ./tests/print_number_test.o -o ./tests/print_number_test
+
+strcmp_test: stdlib
+	nasm -f elf64 ./tests/strcmp_test.asm && ld stdlib.o ./tests/strcmp_test.o -o ./tests/strcmp_test

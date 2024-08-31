@@ -3,6 +3,7 @@ global str_to_int
 global strlen
 global print_number
 global print_char
+global strcmp
 
 SECTION .bss
     char_ptr resb 1
@@ -230,6 +231,33 @@ str_to_int:
     ret
 ; ~ str_to_int ~
 
+; == strcmp ==
+; param 1 ; rdi ; string 1
+; param 2 ; rsi ; string 2
 strcmp:
-    
+    mov rcx, 0
+
+.next:
+    movzx rax, byte [rdi + rcx] ; p1
+    movzx rdx, byte [rsi + rcx] ; p2
+
+    cmp rax, rdx
+    jl .less
+    jg .greater
+
+    test rax, rdx
+    jz .eq
+
+    inc rcx
+    jmp .next
+
+.less:
+    mov rax, -1
     ret
+.greater:
+    mov rax, 1
+    ret
+.eq:
+    mov rax, 0
+    ret
+; ~ strcmp ~
