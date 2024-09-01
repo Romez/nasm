@@ -20,6 +20,8 @@ section .text
 
     add_t db '+', 0
     sub_t db '-', 0
+    mul_t db '*', 0
+    div_t db '/', 0
 
 _start:
 
@@ -45,6 +47,23 @@ _start:
     cmp rax, 0
     jz .subtract
 
+    ; mul
+    mov rdi, token
+    mov rsi, mul_t
+    call strcmp
+
+    cmp rax, 0
+    jz .multiply
+
+    ; div
+    mov rdi, token
+    mov rsi, div_t
+    call strcmp
+
+    cmp rax, 0
+    jz .divide
+
+    ; digit
     mov rdi, token
     call str_to_int
 
@@ -67,6 +86,28 @@ _start:
     pop rax
     
     sub rax, rdx
+
+    push rax
+
+    jmp .read
+
+.multiply:
+    pop rdi
+    pop rax
+    
+    xor rdx, rdx
+    mul rdi
+
+    push rax
+
+    jmp .read
+
+.divide:
+    pop rdi
+    pop rax
+    
+    xor rdx, rdx
+    div rdi
 
     push rax
 
