@@ -1,13 +1,15 @@
 global _start
-extern int_to_ascii
+
+extern print_number
+extern print_char
+extern strcmp
+extern str_to_int
 
 section .bss
-    buffer resb 1
-    buffer_out resb 64
+    token_len equ 64
+    token resb token_len
 
 section .data
-    intro db 'Enter expr in reverse polish notation:', 10
-    intro_len equ $ - intro
 
 section .text
     sys_exit  equ 60
@@ -15,67 +17,85 @@ section .text
     sys_write equ 1
     stdin  equ 0
     stdout equ 1
+
+    add_t db '+', 0
+    sub_t db '-', 0
+
 _start:
-    call print_intro
 
-.read_symbol:
-    ; read user input
-    mov rax, sys_read
-    mov rdi, stdin
-    mov rsi, buffer
-    mov rdx, 1
-    syscall
+.read:
+    call read_token
 
-    test rax, rax
-    jz .end_read
+    cmp byte [token], 0
+    jz .exit
 
-    cmp byte [buffer], 10
-    je .end_read
+    ; add
+    mov rdi, token
+    mov rsi, add_t
+    call strcmp
 
-    cmp byte [buffer], "+"
-    je .add_up
+    cmp rax, 0
+    jz .add_up
 
-    ; TODO: add ops
+    ; sub
+    mov rdi, token
+    mov rsi, sub_t
+    call strcmp
 
-    ; check space
-    cmp byte [buffer], 0x20
-    je .read_symbol
+    cmp rax, 0
+    jz .subtract
 
-    movzx rax, byte [buffer]
-    sub rax, 0x30
+    mov rdi, token
+    call str_to_int
+
     push rax
 
-    jmp .read_symbol
+    jmp .read
 
 .add_up:
-    pop rax
     pop rdx
+    pop rax
+    
     add rax, rdx
+
     push rax
 
-    jmp .read_symbol
+    jmp .read
 
-.end_read:
-    ; result is on stack
-    push buffer_out
-    call int_to_ascii
+.subtract:
+    pop rdx
+    pop rax
+    
+    sub rax, rdx
 
-    mov rdi, stdout
-    mov rsi, buffer_out
-    mov rdx, rax
-    mov rax, 1
-    syscall
+    push rax
+
+    jmp .read
+
+.exit:
+    pop rdi
+    call print_number
+
+    mov rdi, 10
+    call print_char
 
     ; ----
     mov rax, sys_exit
     mov rdi, 0
     syscall
 
-print_intro:
-    mov rdi, stdout
-    mov rsi, intro
-    mov rdx, intro_len
-    mov rax, 1
+.invalid_char_exit:
+    mov rax, sys_exit
+    mov rdi, 1
     syscall
-    
+
+read_token:    
+    mov rax, sys_read
+    mov rdi, stdin
+    mov rsi, token
+    mov rdx, token_len
+    syscall
+
+    mov byte [token + rax - 1], 0
+
     ret

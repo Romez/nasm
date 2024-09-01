@@ -206,7 +206,7 @@ str_to_int:
 
 .loop:
     movzx rsi, byte [rdi + rcx]
-    cmp rsi, 0
+    cmp rsi, 0 ; check str end is 0
     je .end_loop
 
     xor rdx, rdx
