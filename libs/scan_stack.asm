@@ -2,26 +2,34 @@ global scan_stack
 
 ; param 1 ; rdi ; number ; 8 bytes
 scan_stack:
-    mov rcx, rsp ; store rsp
-    mov rdx, rbp ; store rbp
+    mov rcx, rsp
+    sub rcx, rbp
+    add rcx, 8 ; skip scan_stack addr
 
-.go:
-    cmp qword [rcx], rdi
+    mov rdx, rbp
+
+.loop_frame:
+    cmp qword [rdx + rcx], rdi
     je .found
 
-    cmp rcx, rdx
-    je .rbp_match
-
     add rcx, 8
-    jmp .go
 
-.rbp_match:
+    cmp rcx, 0
+    je .next_frame
+
+    jmp .loop_frame
+
+.next_frame:
     cmp qword [rdx], 0
     je .not_found
 
-    mov rdx, qword [rdx]
+    mov rcx, rdx
+    sub rcx, qword [rdx]
     add rcx, 16
-    jmp .go
+
+    mov rdx, qword [rdx]
+
+    jmp .loop_frame
 
 .found:
     mov rax, 1

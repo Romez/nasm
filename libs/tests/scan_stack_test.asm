@@ -8,7 +8,8 @@ _start:
     push rbp
     mov rbp, rsp
 
-    push 10101
+    push 'A'
+    push  'B'
 
     call fn1
 
@@ -20,7 +21,7 @@ fn1:
     push rbp
     mov rbp, rsp
 
-    sub rsp, 16
+    push 'C'
 
     call fn2
 
@@ -35,7 +36,7 @@ fn2:
     push 0
     push 22
 
-    mov rdi, 10101
+    mov rdi, fn1
     call scan_stack
 
     mov rsp, rbp

@@ -28,7 +28,7 @@ _start:
     cmp rax, 0x20 ; space
     je .space
 
-    cmp rax, 10
+    cmp rax, 10 ; \n
     je .space
 
     inc r10
